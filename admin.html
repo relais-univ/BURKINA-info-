@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BURKINA INFOS – Administration</title>
+    <meta name="theme-color" content="#001F9F">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        header {
+            background: #001F9F;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #000000;
+        }
+        h1 { font-size: 20px; }
+        .logout {
+            background: white;
+            color: #001F9F;
+            padding: 8px 15px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid #000000;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 2px solid #000000;
+        }
+        h2 {
+            color: #BA0C0D;
+            font-size: 18px;
+            margin-bottom: 15px;
+            border-left: 4px solid #001F9F;
+            padding-left: 10px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .label {
+            font-weight: bold;
+            color: #666;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        input:focus {
+            border-color: #001F9F;
+            outline: none;
+        }
+        button {
+            background: #001F9F;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+            border: 1px solid #000000;
+        }
+        button.secondary {
+            background: #BA0C0D;
+        }
+        button.danger {
+            background: #f44336;
+        }
+        .toggle-btn {
+            background: #BA0C0D;
+            color: white;
+        }
+        .toggle-btn.off {
+            background: #999;
+            color: white;
+        }
+        .emission-item, .pub-item {
+            background: #f9f9f9;
+            padding: 15px;
+            margin: 12px 0;
+            border-radius: 10px;
+            border-left: 4px solid #001F9F;
+            border: 1px solid #000000;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .checkbox-label input {
+            width: auto;
+            margin: 0;
+        }
+        .success {
+            background: #001F9F;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 10px 0;
+            display: none;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            border: 3px solid #000000;
+        }
+        .login-box h2 {
+            color: #001F9F;
+            margin-bottom: 20px;
+            border-left: none;
+            padding-left: 0;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .login-box button {
+            background: #001F9F;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .logo-mini {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .logo-mini span:first-child {
+            background: #001F9F;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px 0 0 8px;
+            border: 1px solid #000;
+        }
+        .logo-mini span:last-child {
+            background: #BA0C0D;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 0 8px 8px 0;
+            border: 1px solid #000;
+            border-left: none;
+        }
+        .error-msg {
+            color: #f44336;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- ÉCRAN DE CONNEXION -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-box">
+            <div class="logo-mini">
+                <span>BURKINA</span><span>INFOS</span>
+            </div>
+            <h2>🔐 Accès Administration</h2>
+            <input type="password" id="adminPassword" placeholder="Mot de passe" autocomplete="off">
+            <button onclick="verifierMotDePasse()">Se connecter</button>
+            <div id="loginError" class="error-msg">⛔ Mot de passe incorrect</div>
+            <p style="margin-top:15px; font-size:12px;">Espace réservé au personnel BURKINA INFOS</p>
+        </div>
+    </div>
+
+    <!-- CONTENU ADMIN (caché par défaut) -->
+    <div id="adminContent" style="display: none;">
+        <div class="container">
+            <header>
+                <h1>🔧 BURKINA INFOS – Administration</h1>
+                <span class="logout" onclick="deconnexion()">Déconnexion</span>
+            </header>
+
+            <div id="successMsg" class="success">✅ Modifications enregistrées !</div>
+
+            <!-- DIRECT TV -->
+            <div class="card">
+                <h2>📡 DIRECT TV</h2>
+                <p style="color:#666; margin-bottom:10px;">Collez ici le lien du direct (flux vidéo)</p>
+                <input type="text" id="directUrl" placeholder="https://.../stream.m3u8 ou https://.../video.mp4">
+                <div class="help-text">Le lien peut être un fichier .mp4, .m3u8</div>
+                <button onclick="saveDirect()">Mettre à jour le direct</button>
+            </div>
+
+            <!-- INFORMATIONS DU SITE -->
+            <div class="card">
+                <h2>📱 INFORMATIONS DU SITE</h2>
+                <label>Slogan :</label>
+                <input type="text" id="slogan" placeholder="Slogan de la chaîne" value="« L'info en continu, proche de vous »">
+                <label>Numéro WhatsApp :</label>
+                <input type="text" id="whatsappNumber" placeholder="25 40 86 85" value="25 40 86 85">
+                <label>Canal+ :</label>
+                <input type="text" id="canalNumber" placeholder="Canal+ n°5" value="Canal+ n°5">
+                <label>TNT :</label>
+                <input type="text" id="tntNumber" placeholder="TNT n°21" value="TNT n°21">
+                <label>Site web :</label>
+                <input type="text" id="website" placeholder="www.burkina-infos.bf" value="www.burkina-infos.bf">
+                <button onclick="saveInfos()">Mettre à jour les infos</button>
+            </div>
+
+            <!-- GESTION DES PUBLICITÉS -->
+            <div class="card">
+                <h2>📢 GESTION DES PUBLICITÉS</h2>
+                <div style="margin-bottom: 15px;">
+                    <button id="togglePubsBtn" class="toggle-btn" onclick="togglePubs()">✅ Activer les pubs</button>
+                    <span class="help-text" style="margin-left: 10px;">Cliquez pour activer/désactiver</span>
+                </div>
+                <div id="pubs-list"></div>
+                <button class="secondary" onclick="addPub()">+ Ajouter une publicité</button>
+            </div>
+
+            <!-- GESTION DES ÉMISSIONS -->
+            <div class="card">
+                <h2>📺 GESTION DES ÉMISSIONS</h2>
+                <div style="margin-bottom: 15px;">
+                    <button id="toggleEmissionsBtn" class="toggle-btn" onclick="toggleEmissions()">✅ Activer les émissions</button>
+                    <span class="help-text" style="margin-left: 10px;">Cliquez pour activer/désactiver</span>
+                </div>
+                <div id="emissions-list"></div>
+                <button class="secondary" onclick="addEmission()">+ Ajouter une émission</button>
+            </div>
+
+            <!-- STATUT -->
+            <div class="card">
+                <h2>📊 STATUT DU SITE</h2>
+                <div class="info-row">
+                    <span class="label">Site public :</span>
+                    <span style="color:#001F9F;">✅ En ligne</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Publicités :</span>
+                    <span id="pubsStatus">Activées</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Émissions :</span>
+                    <span id="emissionsStatus">Activées</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Dernière mise à jour :</span>
+                    <span id="lastUpdate"></span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>💡 AIDE</h2>
+                <p style="font-size: 13px; color:#666;">
+                    🔑 <strong>Mot de passe : 22333</strong><br>
+                    • Pour le direct : collez le lien du flux vidéo (MP4 ou M3U8)<br>
+                    • Pour chaque émission : ajoutez un lien direct<br>
+                    • Toutes les modifications sont automatiquement sauvegardées
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // BURKINA INFOS - ADMINISTRATION
+        // MOT DE PASSE : 22333
+        // ============================================================
+
+        // FONCTION DE CONNEXION - SIMPLE ET CLAIRE
+        function verifierMotDePasse() {
+            // Récupérer le mot de passe saisi
+            var motDePasseSaisi = document.getElementById('adminPassword').value;
+            
+            // LE BON MOT DE PASSE EST : 22333
+            if (motDePasseSaisi === "22333") {
+                // Connexion réussie
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                // Cacher l'erreur si elle était visible
+                document.getElementById('loginError').style.display = 'none';
+                // Charger la configuration
+                chargerConfig();
+            } else {
+                // Afficher l'erreur
+                document.getElementById('loginError').style.display = 'block';
+                // Effacer le champ pour réessayer
+                document.getElementById('adminPassword').value = '';
+                // Mettre le focus sur le champ
+                document.getElementById('adminPassword').focus();
+            }
+        }
+
+        // Fonction de déconnexion
+        function deconnexion() {
+            document.getElementById('adminContent').style.display = 'none';
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('loginError').style.display = 'none';
+        }
+
+        // Permettre la touche Entrée dans le champ mot de passe
+        document.getElementById('adminPassword').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                verifierMotDePasse();
+            }
+        });
+
+        // ========== CONFIGURATION PAR DÉFAUT ==========
+        let emissions = [
+            { nom: "Le Grand Journal 13h", type: "Actualités", heure: "13h", url: "", download: true },
+            { nom: "Infos Soir 20h", type: "Journal", heure: "20h", url: "", download: true },
+            { nom: "Débat National", type: "Talk", heure: "21h30", url: "", download: true },
+            { nom: "Burkina Économie", type: "Magazine", heure: "11h", url: "", download: true },
+            { nom: "Santé pour Tous", type: "Éducatif", heure: "17h", url: "", download: true },
+            { nom: "Culture & Traditions", type: "Divertissement", heure: "15h", url: "", download: true }
+        ];
+        
+        let pubs = [
+            { titre: "SONABEL", texte: "Énergie pour tous", url: "https://www.sonabel.bf", image: "" },
+            { titre: "ONATEL", texte: "Internet Haut Débit", url: "https://www.onatel.bf", image: "" },
+            { titre: "ECOBANK", texte: "Banque partenaire", url: "https://www.ecobank.com", image: "" }
+        ];
+        
+        let pubsEnabled = true;
+        let emissionsEnabled = true;
+        let directUrl = "";
+        let slogan = "« L'info en continu, proche de vous »";
+        let siteInfos = {
+            whatsapp: "25 40 86 85",
+            canal: "Canal+ n°5",
+            tnt: "TNT n°21",
+            website: "www.burkina-infos.bf"
+        };
+
+        function chargerConfig() {
+            const saved = localStorage.getItem('burkina_infos_config');
+            if (saved) {
+                try {
+                    const config = JSON.parse(saved);
+                    emissions = config.emissions || emissions;
+                    pubs = config.pubs || pubs;
+                    pubsEnabled = config.pubsEnabled !== undefined ? config.pubsEnabled : true;
+                    emissionsEnabled = config.emissionsEnabled !== undefined ? config.emissionsEnabled : true;
+                    directUrl = config.directUrl || "";
+                    slogan = config.slogan || slogan;
+                    siteInfos = config.siteInfos || siteInfos;
+                    
+                    document.getElementById('directUrl').value = directUrl;
+                    document.getElementById('slogan').value = slogan;
+                    document.getElementById('whatsappNumber').value = siteInfos.whatsapp;
+                    document.getElementById('canalNumber').value = siteInfos.canal;
+                    document.getElementById('tntNumber').value = siteInfos.tnt;
+                    document.getElementById('website').value = siteInfos.website;
+                    
+                    updatePubsButton();
+                    updateEmissionsButton();
+                    updateStatus();
+                } catch(e) {}
+            }
+            afficherEmissions();
+            afficherPubs();
+            document.getElementById('lastUpdate').innerText = new Date().toLocaleString();
+        }
+
+        function updatePubsButton() {
+            const btn = document.getElementById('togglePubsBtn');
+            if (pubsEnabled) {
+                btn.innerHTML = '✅ Activer les pubs (activé)';
+                btn.classList.remove('off');
+            } else {
+                btn.innerHTML = '❌ Désactiver les pubs (désactivé)';
+                btn.classList.add('off');
+            }
+        }
+
+        function updateEmissionsButton() {
+            const btn = document.getElementById('toggleEmissionsBtn');
+            if (emissionsEnabled) {
+                btn.innerHTML = '✅ Activer les émissions (activé)';
+                btn.classList.remove('off');
+            } else {
+                btn.innerHTML = '❌ Désactiver les émissions (désactivé)';
+                btn.classList.add('off');
+            }
+        }
+
+        function updateStatus() {
+            document.getElementById('pubsStatus').innerHTML = pubsEnabled ? '✅ Activées' : '❌ Désactivées';
+            document.getElementById('emissionsStatus').innerHTML = emissionsEnabled ? '✅ Activées' : '❌ Désactivées';
+        }
+
+        function showMessage(msg) {
+            const msgDiv = document.getElementById('successMsg');
+            msgDiv.innerText = '✅ ' + msg;
+            msgDiv.style.display = 'block';
+            setTimeout(() => { msgDiv.style.display = 'none'; }, 2500);
+        }
+
+        window.togglePubs = function() {
+            pubsEnabled = !pubsEnabled;
+            updatePubsButton();
+            updateStatus();
+            showMessage(pubsEnabled ? 'Publicités activées' : 'Publicités désactivées');
+            sauvegarderTout();
+        };
+
+        window.toggleEmissions = function() {
+            emissionsEnabled = !emissionsEnabled;
+            updateEmissionsButton();
+            updateStatus();
+            showMessage(emissionsEnabled ? 'Émissions activées' : 'Émissions désactivées');
+            sauvegarderTout();
+        };
+
+        function afficherEmissions() {
+            let html = '';
+            emissions.forEach((em, index) => {
+                html += `
+                    <div class="emission-item">
+                        <input type="text" value="${escapeHtml(em.nom)}" id="nom${index}" placeholder="Nom" style="font-weight:bold;">
+                        <input type="text" value="${escapeHtml(em.type)}" id="type${index}" placeholder="Type">
+                        <input type="text" value="${escapeHtml(em.heure || '')}" id="heure${index}" placeholder="Heure">
+                        <input type="text" value="${escapeHtml(em.url || '')}" id="url${index}" placeholder="Lien vidéo">
+                        <div class="checkbox-label">
+                            <input type="checkbox" id="download${index}" ${em.download !== false ? 'checked' : ''}>
+                            <label>📥 Autoriser le téléchargement</label>
+                        </div>
+                        <button onclick="supprimerEmission(${index})" class="danger">🗑️ Supprimer</button>
+                    </div>
+                `;
+            });
+            document.getElementById('emissions-list').innerHTML = html;
+        }
+
+        function afficherPubs() {
+            let html = '';
+            pubs.forEach((pub, index) => {
+                html += `
+                    <div class="pub-item">
+                        <input type="text" value="${escapeHtml(pub.titre)}" id="pubTitre${index}" placeholder="Titre">
+                        <input type="text" value="${escapeHtml(pub.texte || '')}" id="pubTexte${index}" placeholder="Texte">
+                        <input type="text" value="${escapeHtml(pub.url || '')}" id="pubUrl${index}" placeholder="Lien">
+                        <button onclick="supprimerPub(${index})" class="danger">🗑️ Supprimer</button>
+                    </div>
+                `;
+            });
+            document.getElementById('pubs-list').innerHTML = html;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+   
