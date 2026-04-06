@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BURKINA INFO – Admin</title>
+    <meta name="theme-color" content="#001F9F">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; }
+        .container { max-width: 700px; margin: 0 auto; }
+        header { background: #001F9F; color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border: 2px solid #000000; }
+        .logout { background: white; color: #001F9F; padding: 8px 15px; border-radius: 30px; cursor: pointer; border: 1px solid #000000; }
+        .card { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; border: 2px solid #000000; }
+        h2 { color: #BA0C0D; font-size: 18px; margin-bottom: 15px; border-left: 4px solid #001F9F; padding-left: 10px; }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 8px; }
+        button { background: #001F9F; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 10px; border: 1px solid #000000; }
+        button.secondary { background: #BA0C0D; }
+        button.danger { background: #f44336; }
+        .toggle-btn { background: #BA0C0D; }
+        .toggle-btn.off { background: #999; }
+        .emission-item, .pub-item { background: #f9f9f9; padding: 15px; margin: 12px 0; border-radius: 10px; border: 1px solid #000000; }
+        .checkbox-label { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+        .checkbox-label input { width: auto; margin: 0; }
+        .success { background: #001F9F; color: white; padding: 10px; border-radius: 8px; text-align: center; margin: 10px 0; display: none; }
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; border: 3px solid #000000; }
+        .login-box input { width: 100%; padding: 12px; margin: 10px 0; }
+        .login-box button { background: #001F9F; width: 100%; }
+        .error-msg { color: #f44336; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-box">
+            <h2>🔐 BURKINA INFO Admin</h2>
+            <input type="password" id="adminPassword" placeholder="Mot de passe" autocomplete="off">
+            <button onclick="verifierMotDePasse()">Se connecter</button>
+            <div id="loginError" class="error-msg">⛔ Mot de passe incorrect</div>
+        </div>
+    </div>
+
+    <div id="adminContent" style="display: none;">
+        <div class="container">
+            <header><h1>🔧 BURKINA INFO – Admin</h1><span class="logout" onclick="deconnexion()">Déconnexion</span></header>
+            <div id="successMsg" class="success">✅ Modifications enregistrées sur Firebase !</div>
+
+            <div class="card">
+                <h2>📡 DIRECT TV</h2>
+                <input type="text" id="directUrl" placeholder="Lien du flux vidéo (MP4 ou M3U8)">
+                <button onclick="saveDirect()">Mettre à jour</button>
+            </div>
+
+            <div class="card">
+                <h2>📱 INFORMATIONS</h2>
+                <input type="text" id="slogan" placeholder="Slogan">
+                <input type="text" id="whatsappNumber" placeholder="WhatsApp (ex: 25 40 86 85)">
+                <input type="text" id="canalNumber" placeholder="Canal+ (ex: Canal+ n°5)">
+                <input type="text" id="tntNumber" placeholder="TNT (ex: TNT n°21)">
+                <input type="text" id="website" placeholder="Site web">
+                <button onclick="saveInfos()">Mettre à jour</button>
+            </div>
+
+            <div class="card">
+                <h2>📢 PUBLICITÉS</h2>
+                <button id="togglePubsBtn" class="toggle-btn" onclick="togglePubs()">✅ Activer</button>
+                <div id="pubs-list"></div>
+                <button class="secondary" onclick="addPub()">+ Ajouter</button>
+            </div>
+
+            <div class="card">
+                <h2>📺 ÉMISSIONS</h2>
+                <button id="toggleEmissionsBtn" class="toggle-btn" onclick="toggleEmissions()">✅ Activer</button>
+                <div id="emissions-list"></div>
+                <button class="secondary" onclick="addEmission()">+ Ajouter</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZfGl9pNalTOr7E7D724VrhRwfYyWgiJQ",
+            authDomain: "burkina-infos.firebaseapp.com",
+            projectId: "burkina-infos",
+            storageBucket: "burkina-infos.firebasestorage.app",
+            messagingSenderId: "951195759324",
+            appId: "1:951195759324:web:f3b49cbba67e4f15a1fa19",
+            measurementId: "G-9ZCRQZTWHV"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let emissions = [], pubs = [], pubsEnabled = true, emissionsEnabled = true, directUrl = "", slogan = "", siteInfos = {};
+
+        window.verifierMotDePasse = function() {
+            if (document.getElementById('adminPassword').value === "22333") {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                chargerConfig();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+                document.getElementById('adminPassword').value = '';
+            }
+        };
+
+        document.getElementById('adminPassword').addEventListener('keypress', (e) => { if (e.key === 'Enter') verifierMotDePasse(); });
+
+        window.deconnexion = function() {
+            document.getElementById('adminContent').style.display = 'none';
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('adminPassword').value = '';
+        };
+
+        async function chargerConfig() {
+            const docRef = doc(db, "config", "site");
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                emissions = data.emissions || [];
+                pubs = data.pubs || [];
+                pubsEnabled = data.pubsEnabled !== false;
+                emissionsEnabled = data.emissionsEnabled !== false;
+                directUrl = data.directUrl || "";
+                slogan = data.slogan || "L'information en continu, proche de vous";
+                siteInfos = data.siteInfos || { whatsapp: "25 40 86 85", canal: "Canal+ n°5", tnt: "TNT n°21", website: "burkina-info.bf" };
+            } else {
+                emissions = [
+                    { nom: "Le Grand Journal 13h", type: "Actualités", heure: "13h", url: "", download: true },
+                    { nom: "Infos Soir 20h", type: "Journal", heure: "20h", url: "", download: true },
+                    { nom: "Débat National", type: "Talk", heure: "21h30", url: "", download: true }
+                ];
+                pubs = [
+                    { titre: "SONABEL", texte: "Énergie pour tous", url: "https://www.sonabel.bf" },
+                    { titre: "ONATEL", texte: "Internet Haut Débit", url: "https://www.onatel.bf" }
+                ];
+            }
+            document.getElementById('directUrl').value = directUrl;
+            document.getElementById('slogan').value = slogan;
+            document.getElementById('whatsappNumber').value = siteInfos.whatsapp;
+            document.getElementById('canalNumber').value = siteInfos.canal;
+            document.getElementById('tntNumber').value = siteInfos.tnt;
+            document.getElementById('website').value = siteInfos.website;
+            updatePubsButton();
+            updateEmissionsButton();
+            afficherEmissions();
+            afficherPubs();
+        }
+
+        function updatePubsButton() { const btn = document.getElementById('togglePubsBtn'); btn.innerHTML = pubsEnabled ? '✅ Publicités activées' : '❌ Publicités désactivées'; btn.classList.toggle('off', !pubsEnabled); }
+        function updateEmissionsButton() { const btn = document.getElementById('toggleEmissionsBtn'); btn.innerHTML = emissionsEnabled ? '✅ Émissions activées' : '❌ Émissions désactivées'; btn.classList.toggle('off', !emissionsEnabled); }
+        function showMessage(msg) { const d = document.getElementById('successMsg'); d.innerText = '✅ ' + msg; d.style.display = 'block'; setTimeout(() => d.style.display = 'none', 2500); }
+
+        async function sauvegarderFirebase() {
+            const data = { emissions, pubs, pubsEnabled, emissionsEnabled, directUrl, slogan, siteInfos };
+            await setDoc(doc(db, "config", "site"), data);
+            showMessage('Sauvegardé sur Firebase - visible pour tous !');
+        }
+
+        window.saveDirect = async function() { directUrl = document.getElementById('directUrl').value; await sauvegarderFirebase(); };
+        window.saveInfos = async function() { slogan = document.getElementById('slogan').value; siteInfos = { whatsapp: document.getElementById('whatsappNumber').value, canal: document.getElementById('canalNumber').value, tnt: document.getElementById('tntNumber').value, website: document.getElementById('website').value }; await sauvegarderFirebase(); };
+        window.togglePubs = async function() { pubsEnabled = !pubsEnabled; updatePubsButton(); await sauvegarderFirebase(); };
+        window.toggleEmissions = async function() { emissionsEnabled = !emissionsEnabled; updateEmissionsButton(); await sauvegarderFirebase(); };
+
+        function afficherEmissions() {
+            let html = '';
+            emissions.forEach((em, i) => { html += `<div class="emission-item"><input type="text" value="${escapeHtml(em.nom)}" id="nom${i}"><input type="text" value="${escapeHtml(em.type)}" id="type${i}"><input type="text" value="${escapeHtml(em.heure || '')}" id="heure${i}"><input type="text" value="${escapeHtml(em.url || '')}" id="url${i}"><div class="checkbox-label"><input type="checkbox" id="download${i}" ${em.download !== false ? 'checked' : ''}><label>📥 Téléchargement</label></div><button onclick="supprimerEmission(${i})" class="danger">🗑️</button></div>`; });
+            document.getElementById('emissions-list').innerHTML = html;
+        }
+
+        function afficherPubs() {
+            let html = '';
+            pubs.forEach((pub, i) => { html += `<div class="pub-item"><input type="text" value="${escapeHtml(pub.titre)}" id="pubTitre${i}"><input type="text" value="${escapeHtml(pub.texte || '')}" id="pubTexte${i}"><input type="text" value="${escapeHtml(pub.url || '')}" id="pubUrl${i}"><button onclick="supprimerPub(${i})" class="danger">🗑️</button></div>`; });
+            document.getElementById('pubs-list').innerHTML = html;
+        }
+
+        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+
+        async function collectAndSave() {
+            for (let i = 0; i < emissions.length; i++) {
+                emissions[i].nom = document.getElementById(`nom${i}`)?.value || emissions[i].nom;
+                emissions[i].type = document.getElementById(`type${i}`)?.value || emissions[i].type;
+                emissions[i].heure = document.getElementById(`heure${i}`)?.value || emissions[i].heure;
+                emissions[i].url = document.getElementById(`url${i}`)?.value || emissions[i].url;
+                emissions[i].download = document.getElementById(`download${i}`)?.checked || false;
+            }
+            for (let i = 0; i < pubs.length; i++) {
+                pubs[i].titre = document.getElementById(`pubTitre${i}`)?.value || pubs[i].titre;
+                pubs[i].texte = document.getElementById(`pubTexte${i}`)?.value || pubs[i].texte;
+                pubs[i].url = document.getElementById(`pubUrl${i}`)?.value || pubs[i].url;
+            }
+            await sauvegarderFirebase();
+        }
+
+        window.addEmission = function() { emissions.push({ nom: "Nouvelle émission", type: "Magazine", heure: "", url: "", download: true }); afficherEmissions(); collectAndSave(); };
+        window.addPub = function() { pubs.push({ titre: "Nouvelle pub", texte: "", url: "" }); afficherPubs(); collectAndSave(); };
+        window.supprimerEmission = function(i) { emissions.splice(i, 1); afficherEmissions(); collectAndSave(); };
+        window.supprimerPub = function(i) { pubs.splice(i, 1); afficherPubs(); collectAndSave(); };
+
+        window.addEventListener('beforeunload', () => collectAndSave());
+        setInterval(collectAndSave, 30000);
+    </script>
+</body>
+  </html>
