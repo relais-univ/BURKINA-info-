@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>BURKINA INFO</title>
+    <meta name="theme-color" content="#001F9F">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #F5F7FA; font-family: 'Inter', sans-serif; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .logo { text-align: center; margin-bottom: 20px; }
+        .logo span { display: inline-block; padding: 8px 16px; font-size: 28px; font-weight: 800; }
+        .logo .burkina { background: #001F9F; color: white; border-radius: 12px 0 0 12px; }
+        .logo .info { background: #BA0C0D; color: white; border-radius: 0 12px 12px 0; }
+        .slogan { text-align: center; font-size: 14px; color: #6B7280; margin-bottom: 20px; }
+        .player-card { background: black; border-radius: 20px; overflow: hidden; aspect-ratio: 16/9; margin-bottom: 20px; }
+        video { width: 100%; height: 100%; object-fit: contain; background: black; }
+        
+        /* Boutons modernes */
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            background: white;
+            color: #1F2937;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            border: 1px solid #E5E7EB;
+        }
+        .action-btn:active { transform: scale(0.96); }
+        .btn-primary {
+            background: #001F9F;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,31,159,0.3);
+        }
+        .btn-primary:active { background: #0026c2; }
+        .btn-secondary { background: white; color: #374151; }
+        .btn-secondary:hover { background: #F9FAFB; transform: translateY(-2px); }
+        
+        .info-bulle {
+            background: #EFF6FF;
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            text-align: center;
+            color: #1E40AF;
+            border-left: 4px solid #001F9F;
+        }
+        .section { margin-bottom: 28px; }
+        .section-header { display: flex; justify-content: space-between; margin-bottom: 14px; }
+        .section-title { font-size: 16px; font-weight: 600; }
+        .carousel { overflow-x: auto; scrollbar-width: thin; padding-bottom: 8px; }
+        .carousel-track { display: flex; gap: 14px; width: max-content; }
+        .card { background: white; border-radius: 16px; width: 140px; flex-shrink: 0; border: 1px solid #eee; cursor: pointer; transition: 0.2s; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .card-img { height: 90px; background: linear-gradient(135deg, #E0E7FF, #F3E8FF); display: flex; align-items: center; justify-content: center; font-size: 32px; }
+        .card-content { padding: 10px; }
+        .card-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-sub { font-size: 10px; color: #6B7280; }
+        .card-btn { background: none; border: none; color: #001F9F; font-size: 11px; margin-top: 8px; cursor: pointer; font-weight: 500; }
+        .search-bar { margin-bottom: 24px; }
+        .search-input { width: 100%; padding: 12px 16px; border-radius: 44px; border: 1px solid #ddd; background: white; font-size: 14px; }
+        .info-bar { background: white; border-radius: 16px; padding: 16px; text-align: center; border: 1px solid #eee; margin-bottom: 20px; }
+        .channels { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 12px; font-size: 13px; }
+        .whatsapp-link { background: #25D366; color: white; padding: 8px 18px; border-radius: 40px; text-decoration: none; display: inline-block; font-weight: 500; transition: 0.2s; }
+        .whatsapp-link:hover { opacity: 0.9; transform: scale(1.02); }
+        .footer { text-align: center; font-size: 11px; color: #9CA3AF; padding-top: 16px; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo"><span class="burkina">BURKINA</span><span class="info">INFO</span></div>
+        <div class="slogan" id="sloganTexte">L'information en continu, proche de vous</div>
+
+        <div class="player-card">
+            <video id="player" controls playsinline preload="auto">
+                <source src="#" type="video/mp4">
+                Votre navigateur ne supporte pas la vidéo.
+            </video>
+        </div>
+
+        <!-- 3 boutons -->
+        <div class="actions">
+            <button class="action-btn btn-primary" id="watchBtn">▶️ Regarder</button>
+            <button class="action-btn btn-secondary" id="shareBtn">📤 Partager</button>
+            <button class="action-btn btn-secondary" id="downloadBtn">⬇️ Télécharger</button>
+        </div>
+
+        <div class="info-bulle">
+            💡 Cliquez sur "Regarder" pour charger le direct, puis utilisez les commandes du lecteur.
+        </div>
+
+        <div class="section" id="emissionSection">
+            <div class="section-header"><h2 class="section-title">📺 Dernières émissions</h2></div>
+            <div class="carousel"><div class="carousel-track" id="emissions-track"></div></div>
+        </div>
+
+        <div class="section" id="pubSection">
+            <div class="section-header"><h2 class="section-title">📢 Partenaires</h2></div>
+            <div class="carousel"><div class="carousel-track" id="pub-track"></div></div>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" class="search-input" placeholder="Rechercher une émission...">
+        </div>
+
+        <div class="info-bar" id="receptionInfo">
+            <div class="channels" id="channels"></div>
+            <a href="#" id="whatsappLink" class="whatsapp-link" target="_blank">💬 WhatsApp</a>
+        </div>
+
+        <div class="footer">BURKINA INFO – L'information crédible et réactive</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZfGl9pNalTOr7E7D724VrhRwfYyWgiJQ",
+            authDomain: "burkina-infos.firebaseapp.com",
+            projectId: "burkina-infos",
+            storageBucket: "burkina-infos.firebasestorage.app",
+            messagingSenderId: "951195759324",
+            appId: "1:951195759324:web:f3b49cbba67e4f15a1fa19"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        let currentDirectUrl = "";
+        let currentVideoBlob = null;
+
+        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+        function normaliserWhatsApp(num) { let c = (num || "25408685").replace(/\D/g,''); if(!c.startsWith("226")) c="226"+c; return c; }
+
+        function renderEmissions(emissions) {
+            const container = document.getElementById('emissions-track');
+            if (!emissions?.length) { container.innerHTML = '<div class="card" style="padding:20px">Aucune émission</div>'; return; }
+            container.innerHTML = emissions.map(em => `
+                <div class="card" onclick="window.lireEmission('${em.url || ''}', '${escapeHtml(em.nom)}')">
+                    <div class="card-img">📺</div>
+                    <div class="card-content">
+                        <div class="card-title">${escapeHtml(em.nom)}</div>
+                        <div class="card-sub">${em.heure || 'À voir'}</div>
+                        <button class="card-btn">▶ Regarder</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPubs(pubs) {
+            const container = document.getElementById('pub-track');
+            if (!pubs?.length) { container.innerHTML = '<div class="card" style="padding:20px">Aucun partenaire</div>'; return; }
+            container.innerHTML = pubs.map(pub => `
+                <div class="card" onclick="window.open('${pub.url || '#'}', '_blank')">
+                    <div class="card-img">📢</div>
+                    <div class="card-content">
+                        <div class="card-title">${escapeHtml(pub.titre)}</div>
+                        <div class="card-sub">${escapeHtml(pub.texte || 'Partenariat')}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateUI(data) {
+            if (data.slogan) document.getElementById('sloganTexte').innerText = data.slogan;
+            if (data.directUrl && data.directUrl !== "") {
+                currentDirectUrl = data.directUrl;
+            }
+            if (data.siteInfos) {
+                const wNum = normaliserWhatsApp(data.siteInfos.whatsapp);
+                const whatsappLink = document.getElementById('whatsappLink');
+                whatsappLink.href = `https://wa.me/${wNum}?text=Bonjour%20BURKINA%20INFO`;
+                whatsappLink.innerHTML = `💬 WhatsApp ${data.siteInfos.whatsapp || "25 40 86 85"}`;
+                document.getElementById('channels').innerHTML = `
+                    <span>📡 ${data.siteInfos.canal || 'Canal+ n°5'}</span>
+                    <span>📺 ${data.siteInfos.tnt || 'TNT n°21'}</span>
+                    <span>🌍 ${data.siteInfos.website || 'burkina-info.bf'}</span>
+                `;
+            }
+            document.getElementById('emissionSection').style.display = data.emissionsEnabled === false ? 'none' : 'block';
+            document.getElementById('pubSection').style.display = data.pubsEnabled === false ? 'none' : 'block';
+            if (data.emissionsEnabled !== false) renderEmissions(data.emissions || []);
+            if (data.pubsEnabled !== false) renderPubs(data.pubs || []);
+        }
+
+        onSnapshot(doc(db, "config", "site"), (docSnap) => {
+            if (docSnap.exists()) updateUI(docSnap.data());
+            else console.log("Document Firebase non trouvé");
+        });
+
+        // REGARDER
+        document.getElementById('watchBtn').addEventListener('click', () => {
+            if (!currentDirectUrl) {
+                alert("❌ Aucun lien direct configuré dans l'administration.");
+                return;
+            }
+            const video = document.getElementById('player');
+            const source = video.querySelector('source');
+            source.src = currentDirectUrl;
+            video.load();
+            video.play().catch(e => {
+                alert("Vidéo chargée. Cliquez sur ▶️ pour la lancer.");
+            });
+        });
+
+        // PARTAGER (ouvre la feuille de partage native)
+        document.getElementById('shareBtn').addEventListener('click', () => {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'BURKINA INFO',
+                    text: 'Regardez BURKINA INFO, l’info en continu au Burkina Faso',
+                    url: window.location.href,
+                }).catch(err => console.log("Partage annulé", err));
+            } else {
+                alert("📱 Utilisez le bouton 'Partager' de votre navigateur.");
+            }
+        });
+
+        // TÉLÉCHARGER (télécharge la vidéo en cours)
+        document.getElementById('downloadBtn').addEventListener('click', async () => {
+            const video = document.getElementById('player');
+            const source = video.querySelector('source');
+            let videoUrl = source.src;
+            if (!videoUrl || videoUrl === '#' || videoUrl === window.location.href) {
+                alert("Aucune vidéo chargée. Chargez d'abord le direct ou une émission.");
+                return;
+            }
+            // Si la vidéo est un fichier MP4 distant, on tente de la télécharger directement
+            if (videoUrl.includes('.mp4')) {
+                const link = document.createElement('a');
+                link.href = videoUrl;
+                link.download = videoUrl.split('/').pop() || 'BURKINA_INFO_video.mp4';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                alert("📥 Téléchargement lancé. Le fichier sera dans votre dossier Téléchargements.");
+            } else {
+                alert("Le téléchargement n'est disponible que pour les vidéos au format MP4.");
+            }
+        });
+
+        // Lecture d'une émission depuis le carrousel
+        window.lireEmission = function(url, titre) {
+            if (url && url !== "") {
+                const video = document.getElementById('player');
+                const source = video.querySelector('source');
+                source.src = url;
+                video.load();
+                video.play().catch(e => alert(`"${titre}" chargée. Cliquez sur ▶️.`));
+            } else alert(`"${titre}" – Lien non disponible`);
+        };
+
+        // Recherche
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const terme = e.target.value.toLowerCase();
+            document.querySelectorAll('#emissions-track .card').forEach(card => {
+                const titre = card.querySelector('.card-title')?.innerText.toLowerCase() || '';
+                card.style.display = titre.includes(terme) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>
