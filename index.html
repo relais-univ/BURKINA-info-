@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>BURKINA INFO</title>
+    <meta name="theme-color" content="#001F9F">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- hls.js pour les flux HLS -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #F5F7FA; font-family: 'Inter', sans-serif; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .logo { text-align: center; margin-bottom: 20px; }
+        .logo span { display: inline-block; padding: 8px 16px; font-size: 28px; font-weight: 800; }
+        .logo .burkina { background: #001F9F; color: white; border-radius: 12px 0 0 12px; }
+        .logo .info { background: #BA0C0D; color: white; border-radius: 0 12px 12px 0; }
+        .slogan { text-align: center; font-size: 14px; color: #6B7280; margin-bottom: 20px; }
+        .player-card { background: black; border-radius: 20px; overflow: hidden; aspect-ratio: 16/9; margin-bottom: 20px; }
+        video { width: 100%; height: 100%; object-fit: contain; background: black; }
+        
+        /* Boutons alignés horizontalement */
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            background: white;
+            color: #1F2937;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            border: 1px solid #E5E7EB;
+        }
+        .action-btn:active { transform: scale(0.96); }
+        .btn-primary {
+            background: #001F9F;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,31,159,0.3);
+        }
+        .btn-primary:active { background: #0026c2; }
+        .btn-secondary { background: white; color: #374151; }
+        .btn-secondary:hover { background: #F9FAFB; transform: translateY(-2px); }
+        
+        .section { margin-bottom: 28px; }
+        .section-header { display: flex; justify-content: space-between; margin-bottom: 14px; }
+        .section-title { font-size: 16px; font-weight: 600; }
+        .carousel { overflow-x: auto; scrollbar-width: thin; padding-bottom: 8px; }
+        .carousel-track { display: flex; gap: 14px; width: max-content; }
+        .card { background: white; border-radius: 16px; width: 140px; flex-shrink: 0; border: 1px solid #eee; cursor: pointer; transition: 0.2s; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .card-img { height: 90px; background: linear-gradient(135deg, #E0E7FF, #F3E8FF); display: flex; align-items: center; justify-content: center; font-size: 32px; }
+        .card-content { padding: 10px; }
+        .card-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-sub { font-size: 10px; color: #6B7280; }
+        .card-btn { background: none; border: none; color: #001F9F; font-size: 11px; margin-top: 8px; cursor: pointer; font-weight: 500; }
+        .search-bar { margin-bottom: 24px; }
+        .search-input { width: 100%; padding: 12px 16px; border-radius: 44px; border: 1px solid #ddd; background: white; font-size: 14px; }
+        .info-bar { background: white; border-radius: 16px; padding: 16px; text-align: center; border: 1px solid #eee; margin-bottom: 20px; }
+        .channels { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 12px; font-size: 13px; }
+        .whatsapp-link { background: #25D366; color: white; padding: 8px 18px; border-radius: 40px; text-decoration: none; display: inline-block; font-weight: 500; transition: 0.2s; }
+        .whatsapp-link:hover { opacity: 0.9; transform: scale(1.02); }
+        .footer { text-align: center; font-size: 11px; color: #9CA3AF; padding-top: 16px; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo"><span class="burkina">BURKINA</span><span class="info">INFO</span></div>
+        <div class="slogan" id="sloganTexte">L'information en continu, proche de vous</div>
+
+        <div class="player-card">
+            <video id="player" controls playsinline preload="auto"></video>
+        </div>
+
+        <!-- 3 boutons alignés horizontalement -->
+        <div class="actions">
+            <button class="action-btn btn-primary" id="watchBtn">▶️ Regarder</button>
+            <button class="action-btn btn-secondary" id="shareBtn">📤 Partager</button>
+            <button class="action-btn btn-secondary" id="downloadBtn">⬇️ Télécharger</button>
+        </div>
+
+        <div class="section" id="emissionSection">
+            <div class="section-header"><h2 class="section-title">📺 Dernières émissions</h2></div>
+            <div class="carousel"><div class="carousel-track" id="emissions-track"></div></div>
+        </div>
+
+        <div class="section" id="pubSection">
+            <div class="section-header"><h2 class="section-title">📢 Partenaires</h2></div>
+            <div class="carousel"><div class="carousel-track" id="pub-track"></div></div>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" class="search-input" placeholder="Rechercher une émission...">
+        </div>
+
+        <div class="info-bar" id="receptionInfo">
+            <div class="channels" id="channels"></div>
+            <a href="#" id="whatsappLink" class="whatsapp-link" target="_blank">💬 WhatsApp</a>
+        </div>
+
+        <div class="footer">BURKINA INFO – L'information crédible et réactive</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZfGl9pNalTOr7E7D724VrhRwfYyWgiJQ",
+            authDomain: "burkina-infos.firebaseapp.com",
+            projectId: "burkina-infos",
+            storageBucket: "burkina-infos.firebasestorage.app",
+            messagingSenderId: "951195759324",
+            appId: "1:951195759324:web:f3b49cbba67e4f15a1fa19"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        let currentDirectUrl = "";
+        let hls = null;
+
+        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+        function normaliserWhatsApp(num) { let c = (num || "25408685").replace(/\D/g,''); if(!c.startsWith("226")) c="226"+c; return c; }
+
+        function loadVideo(url, autoPlay = false) {
+            const video = document.getElementById('player');
+            if (hls) { hls.destroy(); hls = null; }
+            video.removeAttribute('src');
+            video.load();
+            if (!url || url === '#') return;
+
+            if (url.includes('.m3u8')) {
+                if (Hls.isSupported()) {
+                    hls = new Hls();
+                    hls.loadSource(url);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => { if (autoPlay) video.play().catch(e => console.log); });
+                    hls.on(Hls.Events.ERROR, () => alert("Erreur de lecture du flux HLS."));
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = url;
+                    if (autoPlay) video.play().catch(e => console.log);
+                } else alert("Votre navigateur ne supporte pas la lecture HLS.");
+            } else {
+                video.src = url;
+                if (autoPlay) video.play().catch(e => console.log);
+            }
+        }
+
+        function renderEmissions(emissions) {
+            const container = document.getElementById('emissions-track');
+            if (!emissions?.length) { container.innerHTML = '<div class="card" style="padding:20px">Aucune émission</div>'; return; }
+            container.innerHTML = emissions.map(em => `
+                <div class="card" onclick="window.lireEmission('${em.url || ''}', '${escapeHtml(em.nom)}')">
+                    <div class="card-img">📺</div>
+                    <div class="card-content">
+                        <div class="card-title">${escapeHtml(em.nom)}</div>
+                        <div class="card-sub">${em.heure || 'À voir'}</div>
+                        <button class="card-btn">▶ Regarder</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPubs(pubs) {
+            const container = document.getElementById('pub-track');
+            if (!pubs?.length) { container.innerHTML = '<div class="card" style="padding:20px">Aucun partenaire</div>'; return; }
+            container.innerHTML = pubs.map(pub => `
+                <div class="card" onclick="window.open('${pub.url || '#'}', '_blank')">
+                    <div class="card-img">📢</div>
+                    <div class="card-content">
+                        <div class="card-title">${escapeHtml(pub.titre)}</div>
+                        <div class="card-sub">${escapeHtml(pub.texte || 'Partenariat')}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateUI(data) {
+            if (data.slogan) document.getElementById('sloganTexte').innerText = data.slogan;
+            if (data.directUrl && data.directUrl !== "") currentDirectUrl = data.directUrl;
+            if (data.siteInfos) {
+                const wNum = normaliserWhatsApp(data.siteInfos.whatsapp);
+                const waLink = document.getElementById('whatsappLink');
+                waLink.href = `https://wa.me/${wNum}?text=Bonjour%20BURKINA%20INFO`;
+                waLink.innerHTML = `💬 WhatsApp ${data.siteInfos.whatsapp || "25 40 86 85"}`;
+                document.getElementById('channels').innerHTML = `
+                    <span>📡 ${data.siteInfos.canal || 'Canal+ n°5'}</span>
+                    <span>📺 ${data.siteInfos.tnt || 'TNT n°21'}</span>
+                    <span>🌍 ${data.siteInfos.website || 'burkina-info.bf'}</span>
+                `;
+            }
+            document.getElementById('emissionSection').style.display = data.emissionsEnabled === false ? 'none' : 'block';
+            document.getElementById('pubSection').style.display = data.pubsEnabled === false ? 'none' : 'block';
+            if (data.emissionsEnabled !== false) renderEmissions(data.emissions || []);
+            if (data.pubsEnabled !== false) renderPubs(data.pubs || []);
+        }
+
+        onSnapshot(doc(db, "config", "site"), (docSnap) => {
+            if (docSnap.exists()) updateUI(docSnap.data());
+            else console.log("Document Firebase non trouvé");
+        });
+
+        document.getElementById('watchBtn').addEventListener('click', () => {
+            if (!currentDirectUrl) alert("❌ Aucun lien direct configuré.");
+            else loadVideo(currentDirectUrl, true);
+        });
+
+        document.getElementById('shareBtn').addEventListener('click', () => {
+            if (navigator.share) navigator.share({ title: 'BURKINA INFO', url: location.href }).catch(()=>{});
+            else alert("Partage non supporté.");
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const video = document.getElementById('player');
+            let src = video.src || (hls ? hls.url : null);
+            if (!src) alert("Aucune vidéo chargée.");
+            else if (src.includes('.mp4')) {
+                const a = document.createElement('a');
+                a.href = src;
+                a.download = src.split('/').pop() || 'video.mp4';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                alert("Téléchargement lancé.");
+            } else alert("Téléchargement disponible uniquement pour les fichiers MP4.");
+        });
+
+        window.lireEmission = function(url, titre) {
+            if (url) loadVideo(url, true);
+            else alert(`"${titre}" – Lien non disponible`);
+        };
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('#emissions-track .card').forEach(card => {
+                const title = card.querySelector('.card-title')?.innerText.toLowerCase() || '';
+                card.style.display = title.includes(term) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+  </html>
